@@ -90,20 +90,35 @@ window.RadarConfig = {
     spotHoldS: 0.8,         // pulsación larga en zona vacía => SPOT
   },
 
+  // Aleatoriedad: cada vez que se carga un escenario, los blancos varían ligeramente. Cada valor es la variación
+  // máxima (±) POR NIVEL DE DIFICULTAD: en un escenario de dificultad 3 varía el triple que en uno de dificultad 1.
+  random: {
+    enabled: true,
+    rangeNm: 3,
+    bearingDeg: 2.5,
+    altFt: 1000,
+    hdgDeg: 3,
+    speedKt: 12,
+  },
+
   /*
    * Escenarios. Cada blanco:
    *   type: nombre (lo muestra NCTR)   rangeNm / bearing: dónde empieza (bearing 0 = delante)
    *   alt: altitud   hdg: rumbo   speed: velocidad   rcs: tamaño (1 = caza normal, 4 = bombardero...)
    *   side: 'hostile' (por defecto), 'friend' o 'unknown' (el IFF no lo identifica)
+   *   beam: 1 o -1 => rumbo = marcación ± 90° (vuela de costado, cae en el notch) aunque la marcación varíe al azar
+   * Cada escenario tiene una dificultad (1-4): multiplica la aleatoriedad de `random` (ver más abajo).
    */
   scenarios: {
     facil: {
+      difficulty: 1,
       name: 'Fácil — un solo blanco de frente',
       targets: [
         { type: 'Su-27', rangeNm: 50, bearing: 5, alt: 22000, hdg: 185, speed: 450, rcs: 1 },
       ],
     },
     normal: {
+      difficulty: 2,
       name: 'Normal — grupo de cuatro',
       targets: [
         { type: 'MiG-29', rangeNm: 45, bearing: -10, alt: 24000, hdg: 170, speed: 450, rcs: 1 },
@@ -113,15 +128,17 @@ window.RadarConfig = {
       ],
     },
     notch: {
+      difficulty: 3,
       name: 'Notch — un blanco que se "esconde"',
       targets: [
         // Cruza a 90° de tu línea de visión (rumbo = marcación + 90°): cae en el notch y el radar no lo ve
-        { type: 'Su-27', rangeNm: 30, bearing: 50, alt: 20000, hdg: 140, speed: 450, rcs: 1 },
+        { type: 'Su-27', rangeNm: 30, bearing: 50, alt: 20000, beam: 1, speed: 450, rcs: 1 },
         // Este sí se acerca y se ve
         { type: 'MiG-29', rangeNm: 55, bearing: -15, alt: 20000, hdg: 170, speed: 450, rcs: 1 },
       ],
     },
     mezcla: {
+      difficulty: 2,
       name: 'Con amigo — distinguir aliados (IFF y NCTR)',
       targets: [
         // Amigo que vuelve en sentido contrario: se acerca, así que el radar lo ve (un amigo que cruzara a 90° de tu línea de visión caería en el notch)
@@ -131,11 +148,12 @@ window.RadarConfig = {
       ],
     },
     dificil: {
+      difficulty: 4,
       name: 'Difícil — varios niveles de altitud',
       targets: [
         { type: 'MiG-29', rangeNm: 35, bearing: -25, alt: 5000, hdg: 160, speed: 480, rcs: 1 },
         { type: 'Su-27', rangeNm: 50, bearing: 0, alt: 35000, hdg: 180, speed: 520, rcs: 1.2 },
-        { type: 'Su-27', rangeNm: 28, bearing: 40, alt: 20000, hdg: 130, speed: 450, rcs: 1 },
+        { type: 'Su-27', rangeNm: 28, bearing: 40, alt: 20000, beam: 1, speed: 450, rcs: 1 },
         { type: 'MiG-31', rangeNm: 65, bearing: 10, alt: 40000, hdg: 185, speed: 600, rcs: 2 },
         { type: 'Su-25', rangeNm: 20, bearing: -45, alt: 2000, hdg: 90, speed: 300, rcs: 0.6 },
       ],

@@ -24,25 +24,37 @@
 
   class Sim {
     constructor() {
+      this.rng = Math.random;   // fuente de azar (se puede sustituir en las pruebas)
+      this.awacs = true;        // CON AWACS: el mapa muestra siempre la posición real de todos los aviones
       this.loadScenario(Object.keys(C.scenarios)[0]);
     }
 
     loadScenario(key) {
       const sc = C.scenarios[key];
       this.scenarioKey = key;
-      this.time = 0;
+      this.time = 0;          // reloj del ejercicio: desde que empieza
+      this.doneAt = null;     // instante en que se identificó el último avión
       this.own = { x: 0, y: 0, hdg: 0, alt: C.ownship.alt, speed: C.ownship.speedKt, turn: 0 };
-      this.targets = sc.targets.map((t, i) => ({
-        id: i + 1,
-        type: t.type,
-        side: t.side || 'hostile',
-        rcs: t.rcs ?? 1,
-        alt: t.alt,
-        hdg: t.hdg,
-        speed: t.speed,
-        x: Math.sin(t.bearing * D2R) * t.rangeNm,
-        y: Math.cos(t.bearing * D2R) * t.rangeNm,
-      }));
+      // Aleatoriedad proporcional a la dificultad del escenario (1-4)
+      const R = C.random;
+      const d = R.enabled ? sc.difficulty || 1 : 0;
+      const j = (amp) => (this.rng() * 2 - 1) * amp * d;
+      this.targets = sc.targets.map((t, i) => {
+        const rangeNm = Math.max(8, t.rangeNm + j(R.rangeNm));
+        const bearing = t.bearing + j(R.bearingDeg);
+        const hdg = t.beam ? bearing + 90 * t.beam + j(R.hdgDeg * 0.5) : t.hdg + j(R.hdgDeg);
+        return {
+          id: i + 1,
+          type: t.type,
+          side: t.side || 'hostile',
+          rcs: t.rcs ?? 1,
+          alt: Math.max(500, t.alt + j(R.altFt)),
+          hdg: wrap(hdg),
+          speed: Math.max(200, t.speed + j(R.speedKt)),
+          x: Math.sin(bearing * D2R) * rangeNm,
+          y: Math.cos(bearing * D2R) * rangeNm,
+        };
+      });
       this.radar = {
         mode: 'RWS',
         searchMode: 'RWS',
@@ -463,6 +475,7 @@
         r.iffT += dt;
         if (r.iffT >= C.iff.timeS) {
           r.iff[t.id] = t.side;
+          if (this.doneAt === null && this.targets.every((x) => r.iff[x.id])) this.doneAt = this.time;
           this.say(T.msg['iff' + t.side[0].toUpperCase() + t.side.slice(1)], 3);
         }
       }

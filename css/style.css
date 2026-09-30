@@ -72,13 +72,13 @@ html:not(.light) .brand .mad { color: #fff; }
 .topnav { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; }
 
 /* Botones: contorno dorado fino, mayúsculas espaciadas */
-.btn, button#restart {
+.btn, button#restart, button#awacs {
   font: 600 0.62rem/1 var(--label); letter-spacing: 0.22em; text-transform: uppercase; text-decoration: none;
   color: var(--accent); background: transparent; border: 1px solid var(--accent-line); border-radius: 1px;
   padding: 0.55rem 0.8rem; cursor: pointer; transition: background .15s, color .15s;
 }
-.btn:hover, button#restart:hover { background: var(--accent-soft); }
-.btn:focus-visible, button#restart:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:hover, button#restart:hover, button#awacs:hover { background: var(--accent-soft); }
+.btn:focus-visible, button#restart:focus-visible, button#awacs:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 .app {
   display: grid;
@@ -283,5 +283,7 @@ select option { background: var(--surface2); }
 .fold .keys { margin-top: 0.7rem; }
 
 /* ---- Escenario: selector y botón de reiniciar bajo el radar, sin marco ---- */
-.scn { display: flex; gap: 0.5rem; margin: 0.9rem 0 0; }
-.scn select { flex: 1; min-width: 0; }
+.scn { display: flex; gap: 0.5rem; margin: 0.9rem 0 0; align-items: stretch; }
+.scn select { flex: 1 1 auto; min-width: 0; }
+.scn button { flex: 0 0 auto; white-space: nowrap; }
+#awacs[aria-pressed="false"] { color: var(--text); border-color: var(--accent); background: var(--accent-soft); }

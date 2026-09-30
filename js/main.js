@@ -33,6 +33,15 @@
   sel.addEventListener('change', () => sim.loadScenario(sel.value));
   $('restart').addEventListener('click', () => sim.loadScenario(sel.value));
 
+  // CON AWACS / SIN AWACS: el texto del botón cambia con cada pulsación
+  const awacsBtn = $('awacs');
+  const paintAwacs = () => {
+    awacsBtn.textContent = sim.awacs ? T.ui.withAwacs : T.ui.withoutAwacs;
+    awacsBtn.setAttribute('aria-pressed', String(sim.awacs));
+  };
+  awacsBtn.addEventListener('click', () => { sim.awacs = !sim.awacs; paintAwacs(); });
+  paintAwacs();
+
   // Mapa del instructor
   const mapCard = $('map-card');
   const instructorMap = new window.RadarMap($('map'), sim);
@@ -81,6 +90,8 @@
   };
 
   const ddi = new window.RadarDDI($('ddi-root'), sim, showHelp);
+  awacsBtn.addEventListener('mouseenter', () => showHelp({ label: 'AWACS', text: T.ui.awacsHelp }));
+  awacsBtn.addEventListener('mouseleave', () => showHelp(null));
 
 
   // ---- Teclado ----

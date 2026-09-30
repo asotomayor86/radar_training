@@ -47,6 +47,8 @@ window.RadarText = {
 
   map: {
     truth: 'REAL',
+    unidentified: 'SIN IDENTIFICAR',
+    allIdentified: 'TODOS IDENTIFICADOS',
     side: 'VISTA LATERAL',
     aria: 'Mapa del instructor: posiciones reales de los aviones, la cuña que barre el radar y una vista lateral de las altitudes que cubre el haz',
   },
@@ -90,6 +92,9 @@ window.RadarText = {
     howTo: 'Controles',
     scenario: 'Escenario',
     restart: 'Reiniciar',
+    withAwacs: 'CON AWACS',
+    withoutAwacs: 'SIN AWACS',
+    awacsHelp: 'AWACS: con AWACS ves siempre en el mapa la posición real de todos los aviones (es una ayuda). Sin AWACS solo aparecen los que el radar detecta en ese momento y los que ya has identificado, que se ven siempre a partir de entonces.',
     heading: 'Rumbo',
     range: 'Escala',
     elev: 'Elevación',
