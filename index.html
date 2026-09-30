@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{if(localStorage.getItem('theme')==='light')document.documentElement.classList.add('light')}catch(e){}</script>
+<title>Radar F/A-18C - MDG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" id="brand" href="https://hangar.escuadronmaddog.com/"><span class="mad">MAD</span><span class="dog">DOG</span></a>
+  <span class="kicker" id="kicker"></span>
+  <h1 class="tool" id="h-title"></h1>
+  <nav class="topnav">
+    <a class="btn" id="back" href="https://hangar.escuadronmaddog.com/"></a>
+    <button class="btn" id="theme-toggle" type="button"></button>
+  </nav>
+</header>
+
+<main class="app">
+  <section class="sim">
+    <div id="ddi-root"></div>
+    <p id="status" class="status"></p>
+    <div class="scn">
+      <select id="scenario"></select>
+      <button id="restart" type="button"></button>
+    </div>
+  </section>
+
+  <aside class="panel">
+    <details class="card fold" id="keys-card">
+      <summary><h2 id="t-keys"></h2></summary>
+      <dl id="keys" class="keys"></dl>
+    </details>
+
+    <div class="card" id="map-card">
+      <canvas id="map"></canvas>
+    </div>
+
+  </aside>
+</main>
+<div id="tip" role="tooltip"></div>
+<script src="js/config.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/sim.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/map.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
