@@ -8,6 +8,8 @@ window.RadarText = {
     back: '← Hangar',
     toLight: 'Tema claro',
     toDark: 'Tema oscuro',
+    fullscreen: 'Página completa',
+    exitFullscreen: 'Salir de página completa',
   },
 
   osb: {

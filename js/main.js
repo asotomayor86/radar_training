@@ -22,6 +22,17 @@
     paintTheme();
   });
   paintTheme();
+  // Página completa (API de pantalla completa del navegador)
+  const fsBtn = $('fullscreen');
+  const root = document.documentElement;
+  if (!root.requestFullscreen) fsBtn.hidden = true;
+  const paintFs = () => { fsBtn.textContent = document.fullscreenElement ? T.brand.exitFullscreen : T.brand.fullscreen; };
+  fsBtn.addEventListener('click', () => {
+    const p = document.fullscreenElement ? document.exitFullscreen() : root.requestFullscreen();
+    if (p && p.catch) p.catch(() => { /* el navegador puede rechazarlo (p. ej. dentro de un iframe sin permiso) */ });
+  });
+  document.addEventListener('fullscreenchange', () => { paintFs(); fitMap(); if (course) course.place(); });
+  paintFs();
   $('h-title').textContent = T.title;
   $('t-keys').textContent = T.ui.howTo;
   $('scenario').setAttribute('aria-label', T.ui.scenario);

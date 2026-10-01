@@ -480,12 +480,19 @@
 
       const list = s.displayContacts();
       const hover = r.mode === 'STT' ? null : this.pick();
-      for (const d of list) this.drawContact(d, hover && hover.id === d.id);
 
+      // Orden: primero rótulos, líneas y círculo; los contactos van siempre encima de todo para verse bien
+      this.drawTexts(list, hover);
       if (r.mode === 'TWS' || r.mode === 'RWS') this.drawLaunchZone(list);
       this.drawAseCircle(list);
       if (r.mode !== 'STT') this.drawTdc();
-      this.drawTexts(list, hover);
+      ctx.globalAlpha = 1;
+      ctx.lineWidth = 1;
+      ctx.font = `12px ${MONO}`;
+      ctx.textBaseline = 'middle';
+      ctx.strokeStyle = GREEN;
+      ctx.fillStyle = GREEN;
+      for (const d of list) this.drawContact(d, hover && hover.id === d.id);
     }
 
     drawFrame() {
@@ -701,8 +708,9 @@
       ctx.fillStyle = YELLOW;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(x - 8, y - 11); ctx.lineTo(x - 8, y + 11);
-      ctx.moveTo(x + 8, y - 11); ctx.lineTo(x + 8, y + 11);
+      const gap = 9.6; // semiseparación de las dos barras (16 px de separación total + 20 %)
+      ctx.moveTo(x - gap, y - 11); ctx.lineTo(x - gap, y + 11);
+      ctx.moveTo(x + gap, y - 11); ctx.lineTo(x + gap, y + 11);
       ctx.stroke();
       if (r.spot !== null) {
         ctx.lineWidth = 1;
