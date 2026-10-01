@@ -59,7 +59,7 @@
     const card = $('map-card');
     const cs = getComputedStyle(card);
     const extra = parseFloat(cs.paddingBottom) + parseFloat(cs.borderBottomWidth);
-    const h = $('restart').getBoundingClientRect().bottom - mapEl.getBoundingClientRect().top - extra;
+    const h = ($('row-course').hidden ? $('row-ex') : $('row-course')).getBoundingClientRect().bottom - mapEl.getBoundingClientRect().top - extra;
     if (h > 240) mapEl.style.height = Math.round(h) + 'px';
   }
   window.addEventListener('resize', fitMap);
@@ -102,7 +102,7 @@
 
   window.addEventListener('keydown', (e) => {
     const tag = e.target.tagName;
-    if (tag === 'SELECT' || (tag === 'BUTTON' && (e.key === 'Enter' || e.key === ' '))) return;
+    if (tag === 'SELECT' || (tag === 'BUTTON' && (e.key === 'Enter' || e.key === ' ')) || tag === 'INPUT') return;
     if (GAME.includes(e.key)) e.preventDefault();
     if (e.repeat) return;
     const k = norm(e.key);
@@ -110,6 +110,10 @@
     if (k === 'Enter' || k === ' ') enterDownAt = performance.now();
     if (k === 'Escape' || k === 'Backspace') sim.undesignate();
     if (k === 'x') ddi.aacq();
+    if (k === 'r') sim.toggleRaid();
+    if (k === '1') sim.selectWeapon('120');
+    if (k === '2') sim.selectWeapon('7M');
+    if (k === '3') sim.selectWeapon('9M');
     if (k === 'm') toggleMap();
   });
   window.addEventListener('keyup', (e) => {
@@ -145,6 +149,7 @@
     last = now;
     readKeys(dt);
     sim.update(dt);
+    sim.setTuc(sim.radar.mode === 'STT' ? null : ((p) => (p && p.id > 0 ? p.id : null))(ddi.pick()));
     ddi.render();
     if (mapOn) instructorMap.render();
 
@@ -158,5 +163,22 @@
   }
   requestAnimationFrame(frame);
 
-  window.__radar = { sim, ddi, instructorMap }; // para depurar desde la consola
+  // ---- Curso / ejercicios: la placa elegida decide qué fila se ve bajo el radar ----
+  const course = new window.RadarCourse.UI({
+    view: $('course-view'), select: $('session'), open: $('open-session'),
+    onPractice: (scn) => { sel.value = scn; sim.loadScenario(scn); },
+  });
+  function setMode(m) {
+    $('row-ex').hidden = m === 'curso';
+    $('row-course').hidden = m !== 'curso';
+    if (m !== 'curso') course.close();
+    fitMap();
+    course.place();
+  }
+  document.addEventListener('radar:plate', (e) => {
+    setMode(e.detail === 'curso' ? 'curso' : 'ejercicios');
+    if (e.detail === 'ejercicios') sel.focus(); else $('session').focus();
+  });
+
+  window.__radar = { sim, ddi, instructorMap, course }; // para depurar desde la consola
 })();

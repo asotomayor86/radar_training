@@ -24,6 +24,8 @@ window.RadarConfig = {
     azScans: [20, 40, 60, 80, 140], // ancho total del barrido (botón inferior)
     defaultAz: 80,
     barsOptions: [1, 2, 4, 6],
+    ageOptions: [2, 4, 8, 16, 32], // segundos que se conserva un eco o una traza sin refrescar (botón AGE de la página DATA)
+    defaultAgeIdx: 2,       // 8 s, el valor que recomiendan
     defaultBars: 4,
     // TWS limita el volumen de barrido: para cada nº de barras, el azimut máximo
     twsMaxAz: { 2: 80, 4: 40, 6: 20 },
@@ -36,6 +38,9 @@ window.RadarConfig = {
   // La antena
   antenna: {
     scanRateDegS: 80,       // velocidad del barrido horizontal
+    slewRateDegS: 80,       // velocidad máxima con la que la antena se reposiciona en azimut (cambio de centro, lock...)
+    slewTolDeg: 3,          // la antena solo se reposiciona si está más de estos grados fuera de la ventana de barrido
+    elevSlewDegS: 40,       // idem en elevación (cuando el radar la manda solo: STT, TWS en AUTO)
     barSpacingDeg: 3.67,    // separación vertical entre barras (4 barras ≈ ±7.5°)
     beamHalfDeg: 2.0,       // semiancho VERTICAL del haz
     beamAzHalfDeg: 3.0,     // semiancho HORIZONTAL del haz (el cono estrecho del mapa del instructor)       // semiancho vertical del haz: un blanco se ve si cae dentro
@@ -52,31 +57,70 @@ window.RadarConfig = {
     hiTailFactor: 0.6,      // ...y poco si se aleja
     medFactor: 0.85,        // PRF MED: alcance medio en cualquier aspecto
     notchKt: 100,           // "notch": blancos cuya velocidad radial respecto al suelo (a lo largo de la línea de visión) es menor que esto, es decir, que vuelan a ~90° de ella, desaparecen
-    eccmFactor: 0.9,        // con ECCM activado el radar pierde algo de alcance (página DATA)
     sttBoost: 1.25,         // en STT el radar apunta fijo y llega más lejos
     sttNotchGraceS: 2.5,    // segundos que aguanta el lock dentro del notch antes de perderlo
   },
 
   rws: {
-    brickAgeS: 8,           // segundos hasta que un brick se borra si no se refresca
+    // (el tiempo que se conserva un eco lo elige el botón AGE de la página DATA: ver display.ageOptions)
     brickFadeMin: 0.25,     // opacidad mínima antes de borrarse
   },
 
   tws: {
     maxFiles: 10,           // máximo de trackfiles
     hafuMax: 8,             // los 8 más cercanos se ven como símbolo; el resto como brick (con HITS)
-    vectorSec: 40,          // longitud de la línea de velocidad (segundos de vuelo)
-    trackDropS: 12,         // segundos sin refrescar hasta perder el trackfile
+    vectorSec: 10,          // segundos de vuelo con los que se calcula la DIRECCIÓN del vector de velocidad
+    vectorPx: 11,           // longitud del vector en la pantalla (fija, medida en capturas del vídeo del escuadrón)
+    vectorGapPx: 7,         // distancia del centro del símbolo a la que nace el vector (su borde inferior)
     biasMarginDeg: 2,       // margen al desplazar el centro del barrido (BIAS)
   },
 
   // Arma seleccionada: solo se muestra en el botón superior derecho del radar (ej. "9M 2")
-  weapon: { label: '9M', count: 2 },
+  // Armas (teclas 1, 2, 3 o clic en el botón 5). Con SET se guarda la configuración de barras y azimut de cada una.
+  weapons: {
+    // rmaxNm: alcance máximo contra un blanco que se acerca de frente; rneNm: fracción de ese alcance que es "sin escape";
+    // rminNm: alcance mínimo. VALORES DIDÁCTICOS: la guía no da cifras; el alcance real varía con altitud, velocidad y aspecto.
+    '120': { label: '120C', count: 4, rmaxNm: 40, rneFrac: 0.4, rminNm: 2 },   // AIM-120 AMRAAM
+    '7M': { label: '7M', count: 2, rmaxNm: 22, rneFrac: 0.4, rminNm: 1.5 },    // AIM-7M Sparrow
+    '9M': { label: '9M', count: 2, rmaxNm: 10, rneFrac: 0.4, rminNm: 0.5 },    // AIM-9M Sidewinder
+  },
+  // El alcance máximo depende del aspecto del blanco, medido por su velocidad de cierre (kt): de frente (cierre alto) es el máximo
+  // y a medida que el blanco se pone de costado y luego se va «a frío» (cierre ~0 o negativo) decae mucho, porque el misil tiene que
+  // alcanzarlo en una persecución: rmax = base * (aspectMin + (1 - aspectMin) * k^curve), con k = cierre / cierreRef entre 0 y 1.
+  // aspectMin = fracción que queda con el blanco huyendo; curve > 1 hace que la caída empiece pronto (de costado ya ~40 %).
+  // VALORES DIDÁCTICOS: ni la guía ni DCS publican cifras; el alcance real también depende de altitud y velocidad del lanzador.
+  launchZone: { aspectMin: 0.25, curve: 1.5, closureRefKt: 900 },
+  defaultWeapon: '9M',
+
+  // RAID (Guía de Chuck, págs. 213 y 226)
+  //  - SCAN RAID (TWS con L&S): barrido de 22° y 3 barras centrado en el L&S; la pantalla muestra 22° x 10 NM alrededor de él
+  //  - RAID SAM (STT): barrido pequeño alrededor del blanco fijado; solo ecos en bruto con su altitud, cada 3,5 s
+  raid: {
+    azDeg: 22,              // ancho de la vista y del barrido de SCAN RAID
+    rangeNm: 10,            // alto de la vista de SCAN RAID (± la mitad a cada lado del L&S)
+    bars: 3,
+    samRadiusNm: 5,         // en RAID SAM, blancos a menos de esta distancia del fijado
+    samUpdateS: 3.5,        // los ecos de RAID SAM se refrescan cada 3,5 s
+    samMergeNm: 1,          // dos ecos más juntos que esto no se separan y salen como una "M"
+  },
+
+  // Círculo del centro de la pantalla (ASE / LAR): siempre centrado; grande cuando el L&S o el blanco fijado está dentro del
+  // alcance máximo del arma y pequeño cuando no lo está. Radios en píxeles del lienzo del DDI (el marco mide ~380).
+  // growPxS: velocidad (px por segundo) a la que crece o se encoge: un movimiento rápido pero gradual.
+  ase: { inRangePx: 65, outRangePx: 13, growPxS: 140 },
+
+  // Enlaces de las placas CURSO y EJERCICIOS del marco. Si se dejan vacíos, CURSO no hace nada y EJERCICIOS lleva al
+  // selector de ejercicios que hay bajo el radar.
+  links: { curso: '', ejercicios: '' },
+
+  // Tamaño de los iconos de las trazas (1 = tamaño base). Aumenta símbolos, bricks y «+» y también el grosor de sus líneas, pero no los textos.
+  iconScale: 1.25,
 
   // IFF: al hacer STT el radar interroga al blanco y, al responder, su símbolo pasa a aliado / hostil / desconocido
   iff: {
     timeS: 1.5,             // segundos que tarda la interrogación
-    maxNm: 60,              // alcance máximo de la interrogación
+    maxNm: 45,              // alcance máximo de la interrogación (según el vídeo del escuadrón)
+    azHalfDeg: 30,          // y solo interroga a ±30° del morro
   },
 
   nctr: {

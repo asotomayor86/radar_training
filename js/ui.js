@@ -5,6 +5,8 @@
 (function () {
   const C = window.RadarConfig;
   const T = window.RadarText;
+  T.plates = T.plates || { curso: 'CURSO', ejercicios: 'EJERCICIOS', cursoHelp: '', ejerciciosHelp: '' };
+  C.links = C.links || { curso: '', ejercicios: '' };
   const W = 480;
   const P = { l: 44, r: 424, t: 52, b: 420 };   // marco del B-scope dentro del canvas (medido en el DDI real)
   const STRIP = P.t + 22;                         // línea inferior de la tira de azimut
@@ -57,17 +59,68 @@
         <linearGradient id="hs-face" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#34363c"/><stop offset=".22" stop-color="#232529"/><stop offset=".6" stop-color="#1a1b1e"/><stop offset="1" stop-color="#1d1e22"/></linearGradient>
         <linearGradient id="hs-flank" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="rgba(255,255,255,.10)"/><stop offset="1" stop-color="rgba(255,255,255,0)"/></linearGradient>
       </defs>
-      <path d="M187 0H413L597 174V646Q597 654 589 654H11Q3 654 3 646V174Z" fill="#0a0b0c"/>
-      <path d="M190 5H410L592 177V642Q592 649 585 649H15Q8 649 8 642V177Z" fill="url(#hs-face)"/>
+      <path d="M187 0H413L597 174V632Q597 654 575 654H25Q3 654 3 632V174Z" fill="#0a0b0c"/>
+      <path d="M190 5H410L592 177V630Q592 649 573 649H27Q8 649 8 630V177Z" fill="url(#hs-face)"/>
       <path d="M190 5H410L592 177V304H8V177Z" fill="url(#hs-flank)" opacity=".5"/>
       <path d="M196 13H404L583 182M196 13L17 182" fill="none" stroke="rgba(0,0,0,.65)" stroke-width="1.8"/>
       <path d="M196 15H404L582 183M196 15L18 183" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="1"/>
-      <path d="M8 642Q8 649 15 649H585Q592 649 592 642" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.2"/>
+      <path d="M8 630Q8 649 27 649H573Q592 649 592 630" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="1.2"/>
       <path d="M220 4V46Q220 58 232 58H369Q381 58 381 46V4" fill="none" stroke="rgba(255,255,255,.11)" stroke-width="1.3"/>
       ${w}${leg(30, 119, 'right')}${leg(481, 570, 'left')}
       ${screw(164, 42)}${screw(437, 42)}${screw(24, 408)}${screw(576, 408)}${screw(76, 630)}${screw(524, 630)}
       <path d="M272 9h19l7 6M328 9h-19l-7 6M266 20h12l4 3" fill="none" stroke="#dcdcd4" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
     </svg>`;
+  }
+
+  // Botón triangular de una esquina, CONTINUO con el marco: rellena el hueco de la esquina y también la franja oscura del
+  // chaflán, con el mismo gris y degradado que la carcasa, y su contorno exterior coincide con el del marco (borde oscuro
+  // de 5 unidades arriba y a los lados). El conjunto se ve como un rectángulo; la ranura del bisel queda como detalle de la
+  // superficie. El de la derecha es el espejo del izquierdo. Coordenadas: lienzo del DDI (600 x 654).
+  function plateSvg(side, label) {
+    const m = (x) => (side === 'r' ? 190 - x : x);
+    const P = (pts) => pts.map(([x, y]) => `${m(x)},${y}`).join(' ');
+    // Esquina exterior redondeada con el mismo radio que las de abajo (22 el contorno, 19 la superficie)
+    const rim = `M${m(25)} 0 H${m(190)} V5 L${m(8)} 177 H${m(3)} V22 Q${m(3)} 0 ${m(25)} 0 Z`;     // borde oscuro exterior (arriba, lateral y chaflán)
+    const face = `M${m(27)} 5 H${m(190)} L${m(8)} 177 V24 Q${m(8)} 5 ${m(27)} 5 Z`;                  // superficie, hasta el antiguo chaflán
+    return `<svg viewBox="0 0 190 177" aria-hidden="true">
+      <defs><linearGradient id="pg-${side}" gradientUnits="userSpaceOnUse" x1="0" y1="5" x2="0" y2="649">
+        <stop offset="0" stop-color="#1b1c20"/><stop offset=".22" stop-color="#131417"/><stop offset=".6" stop-color="#0e0f11"/><stop offset="1" stop-color="#101113"/></linearGradient>
+        <linearGradient id="bv-${side}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f3d96b"/><stop offset=".5" stop-color="#c9a84c"/><stop offset="1" stop-color="#7d651d"/></linearGradient>
+        <linearGradient id="pl-${side}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17181b"/><stop offset="1" stop-color="#0c0d0f"/></linearGradient></defs>
+      <path d="${rim}" fill="#0a0b0c"/>
+      <path class="tri-face" d="${face}" fill="url(#pg-${side})"/>
+      <line class="tri-edge" x1="${m(190)}" y1="5" x2="${m(8)}" y2="177" stroke="transparent" stroke-width="2" stroke-linecap="round"/>
+      <g class="tri-label" transform="translate(${m(87)} 31)">
+        <rect class="tri-box-out" rx="4" ry="4" fill="none" stroke="rgba(0,0,0,.75)" stroke-width="1.4"/>
+        <rect class="tri-box" rx="3" ry="3" fill="url(#pl-${side})" stroke="url(#bv-${side})" stroke-width="1.8"/>
+        <rect class="tri-box-in" rx="2" ry="2" fill="none" stroke="rgba(0,0,0,.65)" stroke-width="1"/>
+        <text class="tri-text" text-anchor="middle" dominant-baseline="central">${label}</text>
+      </g>
+    </svg>`;
+  }
+
+  // Dimensiona la placa negra que rodea al texto de cada botón triangular según lo que mide el texto
+  function fitPlates(root) {
+    for (const g of root.querySelectorAll('.tri-label')) {
+      const t = g.querySelector('.tri-text');
+      let b;
+      try { b = t.getBBox(); } catch (e) { continue; }
+      if (!b.width) continue;
+      const px = 9;
+      const py = 5.5;
+      // Rótulo pegado al lado exterior de la esquina: CURSO a la izquierda, EJERCICIOS a la derecha
+      const cx = 26 + px + b.width / 2;
+      g.setAttribute('transform', `translate(${g.closest('.plate-r') ? 190 - cx : cx} 31)`);
+      const set = (el, inset) => {
+        el.setAttribute('x', (-b.width / 2 - px + inset).toFixed(1));
+        el.setAttribute('y', (-b.height / 2 - py + inset).toFixed(1));
+        el.setAttribute('width', (b.width + 2 * px - 2 * inset).toFixed(1));
+        el.setAttribute('height', (b.height + 2 * py - 2 * inset).toFixed(1));
+      };
+      set(g.querySelector('.tri-box-out'), -1.6);
+      set(g.querySelector('.tri-box'), 0);
+      set(g.querySelector('.tri-box-in'), 2);
+    }
   }
 
   class DDI {
@@ -85,6 +138,8 @@
             <span class="pl pl-night">NIGHT</span><span class="pl pl-off">OFF</span><span class="pl pl-day">DAY</span>
             <div class="pknob"><i></i></div>
           </div>
+          <button type="button" class="plate plate-l" data-plate="curso" aria-label="${T.plates.curso}">${plateSvg('l', T.plates.curso)}</button>
+          <button type="button" class="plate plate-r" data-plate="ejercicios" aria-label="${T.plates.ejercicios}">${plateSvg('r', T.plates.ejercicios)}</button>
           <div class="screen"><canvas></canvas><div class="labels"></div><div class="glass"></div></div>
           <div class="knob knob-brt"><span class="kring"></span><span class="kbody"></span><span class="kcap"></span></div><span class="kl kl-brt">BRT</span>
           <div class="knob knob-cont"><span class="kring"></span><span class="kbody"></span><span class="kcap"></span></div><span class="kl kl-cont">CONT</span>
@@ -132,6 +187,20 @@
       }
 
       this.setupControls();
+      fitPlates(this.ddi);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => fitPlates(this.ddi));
+      window.addEventListener('load', () => fitPlates(this.ddi));
+
+      for (const b of this.ddi.querySelectorAll('.plate')) {
+        const key = b.dataset.plate;
+        b.addEventListener('mouseenter', () => this.onHelp({ label: T.plates[key], text: T.plates[key + 'Help'] }));
+        b.addEventListener('mouseleave', () => this.onHelp(null));
+        b.addEventListener('click', () => {
+          const url = C.links[key];
+          if (url) window.open(url, '_blank', 'noopener');
+          else document.dispatchEvent(new CustomEvent('radar:plate', { detail: key }));
+        });
+      }
 
       // Ratón: un clic mueve el TDC al punto y lo pulsa (TDC depress); mantenido 0,8 s sobre zona vacía = SPOT
       let downAt = 0;
@@ -285,9 +354,13 @@
       const data = r.dataPage;
       const o = {};
 
+      // En SCAN RAID no están disponibles barras, azimut, EXP, escala, centrado ni HITS; solo RAID y RTS
+      const scanRaid = r.raid === 'scan';
+      const raidBtn = { label: 'RAID', boxed: !!r.raid, help: 'raid', press: () => s.toggleRaid() };
+
       // Izquierda
-      o[20] = stt
-        ? { lines: [{ t: 'RTS' }, { t: r.searchMode }], help: 'rts', press: () => s.breakLock() }
+      o[20] = stt || scanRaid
+        ? { lines: [{ t: 'RTS' }, { t: r.searchMode }], help: 'rts', press: () => (scanRaid ? s.exitRaid() : s.breakLock()) }
         : { label: r.mode, help: 'modeSel', press: () => s.cycleMode() };
       const eff = s.effectivePrf(1);
       o[16] = { lines: r.prf === 'INTL' ? [{ t: eff }, { t: 'INTL' }] : [{ t: r.prf }], help: 'prf', press: () => s.cyclePrf() };
@@ -299,17 +372,20 @@
       }
 
       // Arriba
-      if (!stt) o[1] = { label: `${r.bars}B ${r.bar + 1}`, help: 'bars', press: () => s.cycleBars() };
+      if (data) o[1] = { lines: [{ t: 'AGE' }, { t: String(s.ageS) }], help: 'age', press: () => s.cycleAge() };
+      else if (!stt && !scanRaid) o[1] = { label: `${r.bars}B ${r.bar + 1}`, help: 'bars', press: () => s.cycleBars() };
       o[2] = { label: 'SIL', boxed: r.sil, help: 'sil', press: () => s.setSil(!r.sil) };
       if (tws) {
-        o[3] = { label: 'HITS', boxed: r.hits, help: 'hits', press: () => { r.hits = !r.hits; } };
-        o[4] = { label: 'RAID', help: 'raid' };
+        if (!scanRaid) o[3] = { label: 'HITS', boxed: r.hits, help: 'hits', press: () => { r.hits = !r.hits; } };
+        o[4] = raidBtn;
+      } else if (stt) {
+        o[4] = raidBtn;
       } else if (!stt) {
         o[3] = { label: 'ERASE', help: 'erase', press: () => s.erase() };
       }
       o[5] = stt
         ? { label: 'TWS', help: 'tws', press: () => s.sttToTws() }
-        : { label: `${C.weapon.label} ${C.weapon.count}`, help: 'wpn' };
+        : { label: `${s.weapon.label} ${s.weapon.count}`, help: 'wpn', press: () => { const k = Object.keys(C.weapons); s.selectWeapon(k[(k.indexOf(r.weapon) + 1) % k.length]); } };
 
       // Derecha
       if (data) {
@@ -318,15 +394,15 @@
         o[9] = { label: 'MSI', vertical: true, boxed: r.msi, help: 'msi', press: () => { r.msi = !r.msi; } };
         o[10] = { label: 'LTWS', vertical: true, boxed: r.ltws, help: 'ltws', press: () => { if (r.mode === 'RWS') r.ltws = !r.ltws; } };
       } else {
-        o[6] = { label: '↑', help: 'rngUp', press: () => { r.rangeIdx = Math.min(r.rangeIdx + 1, C.display.ranges.length - 1); } };
-        o[7] = { label: '↓', help: 'rngDn', press: () => { r.rangeIdx = Math.max(r.rangeIdx - 1, 0); } };
-        if (tws) {
+        if (!scanRaid) o[6] = { label: '↑', help: 'rngUp', press: () => { r.rangeIdx = Math.min(r.rangeIdx + 1, C.display.ranges.length - 1); } };
+        if (!scanRaid) o[7] = { label: '↓', help: 'rngDn', press: () => { r.rangeIdx = Math.max(r.rangeIdx - 1, 0); } };
+        if (tws && !scanRaid) {
           o[8] = {
             lines: [{ t: 'AUTO', boxed: r.centering === 'AUTO' }, { t: 'MAN', boxed: r.centering === 'MAN' }, ...(r.centering === 'BIAS' ? [{ t: 'BIAS', boxed: true }] : [])],
             help: 'cntr', press: () => s.cycleCentering(),
           };
-        } else if (!stt) {
-          o[8] = { label: 'SET', vertical: true, help: 'set', press: () => s.say('SET N/D', 1.6) };
+        } else if (!stt && !tws) {
+          o[8] = { label: 'SET', vertical: true, help: 'set', press: () => s.setWpnConfig() };
         }
         o[9] = { label: 'RSET', vertical: true, help: 'rset', press: () => s.reset() };
         o[10] = { label: 'NCTR', vertical: true, boxed: r.nctr, help: 'nctr', press: () => { r.nctr = !r.nctr; r.nctrT = 0; } };
@@ -338,8 +414,8 @@
         ? { label: `DCLTR ${r.dcltr}`, boxed: true, help: 'dcltr', press: () => { r.dcltr = r.dcltr === 2 ? 1 : 2; } }
         : { label: 'CHAN', help: 'chan' };
       if (data) o[14] = { label: 'BRA', boxed: r.bra, help: 'bra', press: () => { r.bra = !r.bra; } };
-      else if (!stt) o[14] = { label: `${r.spot !== null ? C.display.spotAz : r.az}°`, help: 'az', press: () => s.cycleAz() };
-      o[15] = tws || stt ? { label: 'EXP', help: 'exp' } : { label: 'MODE', help: 'mode15' };
+      else if (!stt && !scanRaid) o[14] = { label: `${r.spot !== null ? C.display.spotAz : r.az}°`, help: 'az', press: () => s.cycleAz() };
+      if (!scanRaid) o[15] = tws || stt ? { label: 'EXP', help: 'exp' } : { label: 'MODE', help: 'mode15' };
       return o;
     }
 
@@ -406,6 +482,8 @@
       const hover = r.mode === 'STT' ? null : this.pick();
       for (const d of list) this.drawContact(d, hover && hover.id === d.id);
 
+      if (r.mode === 'TWS' || r.mode === 'RWS') this.drawLaunchZone(list);
+      this.drawAseCircle(list);
       if (r.mode !== 'STT') this.drawTdc();
       this.drawTexts(list, hover);
     }
@@ -421,17 +499,15 @@
       ctx.moveTo(P.l, STRIP); ctx.lineTo(P.r, STRIP);
       for (const a of [-60, -30, 30, 60]) { ctx.moveTo(this.X(a), STRIP); ctx.lineTo(this.X(a), STRIP + 18); }
       ctx.stroke();
-      // Triángulo del rumbo propio, colgado de la tira, con el rumbo/10 dentro de un círculo; rumbo arriba
+      // Rumbo propio arriba (el triángulo que había aquí no existe así en el radar real)
       const cx = this.X(0);
-      ctx.beginPath(); ctx.moveTo(cx - 17, STRIP); ctx.lineTo(cx + 17, STRIP); ctx.lineTo(cx, STRIP + 29); ctx.closePath(); ctx.stroke();
-      ctx.beginPath(); ctx.arc(cx, STRIP + 10, 8.5, 0, Math.PI * 2); ctx.stroke();
       ctx.textAlign = 'center';
-      ctx.font = `10px ${MONO}`;
-      ctx.fillText(String(Math.round((((s.own.hdg % 360) + 360) % 360) / 10)).padStart(2, '0'), cx, STRIP + 10.5);
       ctx.font = `12px ${MONO}`;
       ctx.fillText(pad3(s.own.hdg) + '°', cx, P.t - 11);
-      // B-sweep: posición instantánea de la antena
-      ctx.beginPath(); ctx.moveTo(this.X(clamp(r.antAz, -70, 70)), P.t); ctx.lineTo(this.X(clamp(r.antAz, -70, 70)), P.b); ctx.stroke();
+      // B-sweep: posición instantánea de la antena. En SCAN RAID queda congelado en el azimut del L&S (escala de 140°)
+      const rv = s.raidView();
+      const sweepAz = clamp(rv ? rv.azC : r.antAz, -70, 70);
+      ctx.beginPath(); ctx.moveTo(this.X(sweepAz), P.t); ctx.lineTo(this.X(sweepAz), P.b); ctx.stroke();
     }
 
     drawScales() {
@@ -456,15 +532,17 @@
       ctx.moveTo(P.l + 18, y); ctx.lineTo(P.l + 2, y);
       ctx.moveTo(P.l + 9, y - 6); ctx.lineTo(P.l + 2, y); ctx.lineTo(P.l + 9, y + 6);
       ctx.stroke();
+
       // Escala de distancia (con el rombo del control del TDC) y cero
       ctx.textAlign = 'left';
-      const top = r.mode === 'VS' ? String(C.display.vsMaxClosureKt) : String(s.scale);
+      const rvw = s.raidView();
+      const top = rvw ? String(Math.round(rvw.rngC + C.raid.rangeNm / 2)) : r.mode === 'VS' ? String(C.display.vsMaxClosureKt) : String(s.scale);
       ctx.fillText(top, P.r + 4, P.t + 2);
       ctx.beginPath();
       const dx = P.r + 14; const dy = P.t - 20;
       ctx.moveTo(dx, dy - 5); ctx.lineTo(dx + 5, dy); ctx.lineTo(dx, dy + 5); ctx.lineTo(dx - 5, dy); ctx.closePath();
       ctx.stroke();
-      ctx.fillText('0', P.r + 6, P.b - 6);
+      ctx.fillText(rvw ? String(Math.max(0, Math.round(rvw.rngC - C.raid.rangeNm / 2))) : '0', P.r + 6, P.b - 6);
     }
 
     drawTexts(list, hover) {
@@ -490,7 +568,18 @@
 
       if (r.bra && r.mode !== 'STT' && r.mode !== 'VS') {
         ctx.textAlign = 'left';
-        ctx.fillText(`BRA ${pad3(s.own.hdg + r.tdc.az)}°/${(r.tdc.rng * s.scale).toFixed(1)}`, P.l + 8, P.b - 10);
+        ctx.fillText(`BRA ${pad3(s.own.hdg + r.tdc.az)}°/${(r.tdc.rng * s.scale).toFixed(1)}`, P.l + 22, P.b - 32);
+      }
+
+      // Velocidad de cierre del L&S (TWS) o del blanco fijado (STT): un «>» sobre el marco derecho a su distancia
+      const lsd = list.find((q) => q.isLS && (q.style === 'hafu' || q.style === 'stt'));
+      if (lsd && lsd.f >= 0 && lsd.f <= 1) {
+        const ly = this.Y(lsd.f);
+        ctx.beginPath(); ctx.moveTo(P.r - 7, ly - 5); ctx.lineTo(P.r, ly); ctx.lineTo(P.r - 7, ly + 5); ctx.stroke();
+        ctx.textAlign = 'right';
+        ctx.font = `11px ${MONO}`;
+        ctx.fillText(String(Math.round(lsd.c.closure)), P.r - 11, ly);
+        ctx.font = `12px ${MONO}`;
       }
 
       if (r.mode === 'STT' && list[0]) {
@@ -508,6 +597,14 @@
       if (r.sil || r.standby) {
         ctx.font = `bold 26px ${MONO}`;
         ctx.fillText(r.sil ? 'SIL' : 'STBY', (P.l + P.r) / 2, (P.t + P.b) / 2);
+      }
+      if (r.raid === 'scan') {
+        ctx.font = `bold 13px ${MONO}`;
+        ctx.fillText('SCAN RAID', (P.l + P.r) / 2, (P.t + P.b) / 2 + 40);
+      }
+      if (r.raid === 'sam') {
+        ctx.font = `bold 13px ${MONO}`;
+        ctx.fillText('RAID', (P.l + P.r) / 2, P.b - 24);
       }
       if (r.spot !== null) {
         ctx.font = `bold 13px ${MONO}`;
@@ -539,6 +636,59 @@
       ctx.fillStyle = GREEN;
       lines.forEach((t, i) => ctx.fillText(t, x0 + 6, y0 + 11 + i * 13));
       ctx.font = `12px ${MONO}`;
+    }
+
+    // Alcance de disparo del L&S y del DT2 (con LTWS o TWS): una barra vertical a su azimut, desde el alcance mínimo
+    // hasta el máximo, con un travesaño largo en cada extremo y uno corto en el alcance sin escape. Si el blanco
+    // está entre esas marcas, está dentro del alcance. Valores didácticos (ver weapons y launchZone en config.js)
+    drawLaunchZone(list) {
+      const ctx = this.ctx;
+      const s = this.sim;
+      if (s.radar.mode === 'RWS' && !s.radar.ltws) return;
+      if (s.radar.raid === 'scan') return;
+      for (const d of list) {
+        if (!(d.isLS || d.isDT2) || !d.c) continue;
+        const z = s.launchZone(d.c);
+        const x = this.X(d.az);
+        const yMax = this.Y(Math.min(z.rmax / s.scale, 1));
+        const yMin = this.Y(Math.min(z.rmin / s.scale, 1));
+        const yNe = this.Y(Math.min(z.rne / s.scale, 1));
+        ctx.strokeStyle = GREEN;   // siempre verde, sea hostil o no el blanco
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x, yMax); ctx.lineTo(x, yMin);
+        ctx.moveTo(x - 8, yMax); ctx.lineTo(x + 8, yMax);
+        ctx.moveTo(x - 8, yMin); ctx.lineTo(x + 8, yMin);
+        ctx.moveTo(x - 8, yNe); ctx.lineTo(x + 8, yNe);
+        ctx.stroke();
+        ctx.lineWidth = 1;
+      }
+      ctx.strokeStyle = GREEN;
+    }
+
+    // Círculo del centro de la pantalla: siempre centrado; crece cuando el blanco (L&S, o el fijado en STT) está dentro
+    // del alcance máximo del arma y se encoge cuando no lo está
+    drawAseCircle(list) {
+      const s = this.sim;
+      const r = s.radar;
+      const now = performance.now();
+      const dt = this.aseT ? Math.min(0.1, (now - this.aseT) / 1000) : 0;
+      this.aseT = now;
+      const ls = r.raid === 'scan' || !(r.mode === 'TWS' || r.mode === 'STT' || (r.mode === 'RWS' && r.ltws))
+        ? null : list.find((q) => q.isLS && q.c && (q.style === 'hafu' || q.style === 'stt'));
+      if (!ls) { this.aseR = null; return; }
+      const inRange = ls.c.rng <= s.launchZone(ls.c).rmax;
+      const target = inRange ? C.ase.inRangePx : C.ase.outRangePx;
+      // El radio cambia de forma continua hacia el tamaño que corresponde
+      if (this.aseR == null) this.aseR = target;
+      else this.aseR += clamp(target - this.aseR, -C.ase.growPxS * dt, C.ase.growPxS * dt);
+      const ctx = this.ctx;
+      ctx.strokeStyle = GREEN;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc((P.l + P.r) / 2, (P.t + P.b) / 2, this.aseR, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.lineWidth = 1;
     }
 
     drawTdc() {
@@ -578,16 +728,25 @@
       if (x < P.l - 2 || x > P.r + 2 || y < P.t - 2 || y > P.b + 2) return;
       const ltwsSymbol = s.radar.mode === 'RWS' && s.radar.ltws && (d.isLS || d.isDT2 || hovered);
       ctx.globalAlpha = d.alpha;
-      if (d.style === 'brick' && !ltwsSymbol) {
+      const ik = C.iconScale || 1;
+      if (d.sam) {
         ctx.fillStyle = GREEN;
-        ctx.fillRect(x - 4, y - 2, 8, 4);
+        ctx.textAlign = 'left';
+        ctx.font = `11px ${MONO}`;
+        if (d.sam.merged) ctx.fillText('M', x - 4, y);
+        else { ctx.fillRect(x - 4 * ik, y - 2 * ik, 8 * ik, 4 * ik); ctx.fillText(String(Math.round(d.sam.alt / 1000)), x + 8 * ik, y); }
+        ctx.font = `12px ${MONO}`;
+      } else if (d.style === 'lpt') {
+        ctx.strokeStyle = YELLOW;
+        ctx.lineWidth = 1.2 * ik;
+        ctx.beginPath(); ctx.moveTo(x - 4 * ik, y); ctx.lineTo(x + 4 * ik, y); ctx.moveTo(x, y - 4 * ik); ctx.lineTo(x, y + 4 * ik); ctx.stroke();
+        ctx.lineWidth = 1;
+      } else if (d.style === 'brick' && !ltwsSymbol) {
+        ctx.fillStyle = GREEN;
+        ctx.fillRect(x - 4 * ik, y - 2 * ik, 8 * ik, 4 * ik);
       } else if (d.style === 'stt') {
         this.hafu(x, y, d, true, true);
       } else {
-        if (d.vec) {
-          ctx.strokeStyle = GREEN;
-          ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(this.X(d.vec.az), this.Y(d.vec.f)); ctx.stroke();
-        }
         this.hafu(x, y, d, d.isLS || d.isDT2 || hovered, false);
       }
       ctx.globalAlpha = 1;
@@ -597,11 +756,14 @@
     hafu(x, y, d, showData, isStt) {
       const ctx = this.ctx;
       const c = d.c;
+      const ik = C.iconScale || 1;
       // Color/forma según el resultado del IFF (amigo, hostil o desconocido); sin respuesta aún, desconocido
       const kind = d.iff || (d.ident ? (c.side === 'friend' ? 'friend' : c.side === 'hostile' ? 'hostile' : 'unknown') : 'unknown');
       const col = kind === 'hostile' ? RED : kind === 'friend' ? GREEN : YELLOW;
       ctx.strokeStyle = col;
       ctx.fillStyle = col;
+      ctx.save();
+      ctx.translate(x, y); ctx.scale(ik, ik); ctx.translate(-x, -y);
       ctx.lineWidth = 1.5;
       ctx.beginPath();
       if (kind === 'hostile') {
@@ -617,12 +779,19 @@
       if (d.isDT2) {
         ctx.beginPath(); ctx.moveTo(x, y - 3); ctx.lineTo(x + 3, y); ctx.lineTo(x, y + 3); ctx.lineTo(x - 3, y); ctx.closePath(); ctx.fill();
       }
+      if (!showData && d.rank && !isStt) {
+        ctx.font = `10px ${MONO}`;
+        ctx.textAlign = 'center';
+        ctx.fillText(String(d.rank), x, y + 1);
+        ctx.font = `12px ${MONO}`;
+      }
+      ctx.restore();
       if (showData) {
         ctx.font = `11px ${MONO}`;
         ctx.textAlign = 'right';
-        ctx.fillText(c.mach.toFixed(1), x - 11, y);
+        ctx.fillText(c.mach.toFixed(1), x - 11 * ik, y);
         ctx.textAlign = 'left';
-        ctx.fillText((c.alt / 1000).toFixed(1), x + 11, y);
+        ctx.fillText(String(+(c.alt / 1000).toFixed(1)), x + 11 * ik, y);
         if (isStt && this.sim.radar.nctr) {
           ctx.textAlign = 'center';
           ctx.fillText(d.ident ? c.type : T.ui.unknownType, x, y + 18);
@@ -633,6 +802,19 @@
           if (Math.floor(performance.now() / 250) % 2 === 0) ctx.fillText('IFF', x, y - 18);
         }
         ctx.font = `12px ${MONO}`;
+      }
+      // Vector de velocidad: un palito corto de longitud fija (no depende de la escala), del color del símbolo
+      if (d.vec && !isStt) {
+        const vx = this.X(d.vec.az) - x;
+        const vy = this.Y(d.vec.f) - y;
+        const vl = Math.hypot(vx, vy);
+        if (vl > 0.5) {
+          const ux = vx / vl;
+          const uy = vy / vl;
+          const g = C.tws.vectorGapPx * ik;
+          ctx.strokeStyle = col;
+          ctx.beginPath(); ctx.moveTo(x + ux * g, y + uy * g); ctx.lineTo(x + ux * (g + C.tws.vectorPx), y + uy * (g + C.tws.vectorPx)); ctx.stroke();
+        }
       }
       ctx.strokeStyle = GREEN;
       ctx.fillStyle = GREEN;

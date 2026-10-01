@@ -76,6 +76,8 @@
       ctx.lineWidth = 1;
 
       // ---- Vista superior ----
+      ctx.save();
+      ctx.beginPath(); ctx.rect(0, 0, W, W); ctx.clip();
       const gx = W / 2;
       const gy = 0.94 * W;
       const m = 0.86 * W;
@@ -168,6 +170,8 @@
       // Al terminar, junto al aviso sale el tiempo que se ha tardado desde el inicio del ejercicio
       const clock = (sec) => `${String(Math.floor(sec / 60)).padStart(2, '0')}:${String(Math.floor(sec % 60)).padStart(2, '0')}`;
       ctx.fillText(pending ? `${T.map.unidentified}: ${pending}` : `${T.map.allIdentified}  ${clock(s.doneAt ?? s.time)}`, W - 9, 12);
+
+      ctx.restore();
 
       // ---- Vista lateral ----
       const k = H - W;
