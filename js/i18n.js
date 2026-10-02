@@ -15,7 +15,7 @@ window.RadarText = {
   osb: {
     bars: 'Barras de elevación: cuántas "líneas" horizontales barre la antena, de abajo arriba (1, 2, 4 o 6). Más barras cubren más altura pero tardan más en volver a mirar cada sitio. El número que acompaña es la barra en curso.',
     sil: 'SIL (silencio): el radar deja de emitir y pasa a espera. No detectas nada, pero tampoco delatas tu posición.',
-    age: 'AGE: tiempo (en segundos) que se conserva un eco o una traza sin refrescar antes de borrarlo. Cuanto más alto, más tiempo se quedan en pantalla. Se recomienda 8. Está en la página DATA.',
+    age: 'AGE: tiempo (en segundos) que se conserva un eco o una traza sin refrescar antes de borrarlo. Cuanto más alto, más tiempo se quedan en pantalla. Se recomienda 8. Está en la página DATA, arriba a la derecha, y el botón solo muestra el número (2, 4, 8, 16 o 32), sin la palabra AGE.',
     erase: 'ERASE: borra todos los ecos de la pantalla (toda la historia de blancos).',
     hits: 'HITS (solo en TWS): muestra los ecos en bruto (bricks) de lo que no cabe entre los 8 trackfiles que se dibujan como símbolo.',
     raid: 'RAID (tecla R): en TWS con un L&S entra en SCAN RAID, un barrido de 22° y 3 barras centrado en él, con una vista de 22° x 10 NM, para separar blancos que vuelan muy juntos y el radar ve como uno. En STT entra en RAID SAM: ecos en bruto con su altitud alrededor del blanco fijado, que se refrescan cada 3,5 s (una «M» es un grupo que no se separa). Se sale con RTS, Undesignate, RSET o volviendo a pulsar RAID.',

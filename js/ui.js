@@ -372,8 +372,7 @@
       }
 
       // Arriba
-      if (data) o[1] = { lines: [{ t: 'AGE' }, { t: String(s.ageS) }], help: 'age', press: () => s.cycleAge() };
-      else if (!stt && !scanRaid) o[1] = { label: `${r.bars}B ${r.bar + 1}`, help: 'bars', press: () => s.cycleBars() };
+      if (!data && !stt && !scanRaid) o[1] = { label: `${r.bars}B ${r.bar + 1}`, help: 'bars', press: () => s.cycleBars() };
       o[2] = { label: 'SIL', boxed: r.sil, help: 'sil', press: () => s.setSil(!r.sil) };
       if (tws) {
         if (!scanRaid) o[3] = { label: 'HITS', boxed: r.hits, help: 'hits', press: () => { r.hits = !r.hits; } };
@@ -383,7 +382,10 @@
       } else if (!stt) {
         o[3] = { label: 'ERASE', help: 'erase', press: () => s.erase() };
       }
-      o[5] = stt
+      // En la página DATA, el botón superior derecho es el AGE: solo muestra el número de segundos (según el vídeo del escuadrón)
+      o[5] = data
+        ? { label: String(s.ageS), help: 'age', press: () => s.cycleAge() }
+        : stt
         ? { label: 'TWS', help: 'tws', press: () => s.sttToTws() }
         : { label: `${s.weapon.label} ${s.weapon.count}`, help: 'wpn', press: () => { const k = Object.keys(C.weapons); s.selectWeapon(k[(k.indexOf(r.weapon) + 1) % k.length]); } };
 

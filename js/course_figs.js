@@ -876,7 +876,7 @@
     [16, 'PRF', 'prf'], [17, 'RDR PRI', 'rdrpri'], [18, 'SURF', 'surf'], [19, '', null], [20, 'RWS', 'modeSel'],
   ];
   const OSB_DATA = [
-    [1, 'AGE', 'age'], [2, 'SIL', 'sil'], [3, 'ERASE', 'erase'], [4, '', null], [5, '120C', 'wpn'],
+    [1, '', null], [2, 'SIL', 'sil'], [3, 'ERASE', 'erase'], [4, '', null], [5, '8', 'age'],
     [6, '', null], [7, 'RAID 1LOOK', 'raidlook'], [8, 'COLOR', 'color'], [9, 'MSI', 'msi'], [10, 'LTWS', 'ltws'],
     [11, 'DATA', 'data'], [12, 'DCLTR', 'dcltr'], [13, '', null], [14, 'BRA', 'bra'], [15, 'MODE', 'mode15'],
     [16, 'PRF', 'prf'], [17, '', null], [18, '', null], [19, 'ECCM', 'eccm'], [20, 'RWS', 'modeSel'],

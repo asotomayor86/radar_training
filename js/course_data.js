@@ -254,12 +254,12 @@
       steps: [
         {
           title: 'Qué hay en DATA',
-          fig: { type: 'osb', page: 'data', hl: [1, 7, 8, 9, 10, 12, 14, 19] },
+          fig: { type: 'osb', page: 'data', hl: [5, 7, 8, 9, 10, 12, 14, 19] },
           doneFlag: 'all',
           done: ok('Has repasado las opciones de DATA.'),
           html: `
             <p>El botón <b>DATA</b> (OSB 11) abre un submenú del radar. Al pulsarlo, algunos botones cambian de función:</p>
-            <p><b>AGE:</b> cuánto se conservan los ecos. <b>LTWS:</b> activa el seguimiento «latente» en RWS. <b>MSI:</b> integración de varias fuentes. <b>COLOR, DCLTR:</b> aspecto de la pantalla. <b>BRA:</b> marcación, distancia y altitud al cursor. <b>ECCM:</b> contramedidas.</p>
+            <p><b>AGE</b> (arriba a la derecha; el botón solo muestra un número): cuánto se conservan los ecos. <b>LTWS:</b> activa el seguimiento «latente» en RWS. <b>MSI:</b> integración de varias fuentes. <b>COLOR, DCLTR:</b> aspecto de la pantalla. <b>BRA:</b> marcación, distancia y altitud al cursor. <b>ECCM:</b> contramedidas.</p>
             <p>⚠ En esta herramienta no tienen efecto <b>ECCM</b>, <b>COLOR</b>, <b>DCLTR</b>, <b>MSI</b> y <b>RAID 1LOOK</b>; sí funcionan <b>AGE</b>, <b>LTWS</b> y <b>BRA</b>. Pulsa los botones resaltados para leer su descripción.</p>`,
         },
         {
@@ -283,7 +283,7 @@
         {
           title: 'Resumen',
           end: true,
-          fig: { type: 'osb', page: 'data', hl: [1, 10, 14] },
+          fig: { type: 'osb', page: 'data', hl: [5, 10, 14] },
           html: `
             <ul>
               <li>DATA cambia la función de varios botones.</li>

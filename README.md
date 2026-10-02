@@ -90,7 +90,7 @@ Numeración real: 1–5 arriba (izq→der), 6–10 derecha (arriba→abajo), 11�
 
 **SET y armas** (según el vídeo del escuadrón): **SET** guarda las barras y el azimut del arma seleccionada; al elegir otra arma y volver, el radar recupera esa configuración. Armas: teclas 1 (120C), 2 (7M), 3 (9M) o clic en el botón superior derecho. **AGE** (página DATA, arriba a la izquierda): 2, 4, 8, 16 o 32 s que se conserva un eco o una traza; por defecto 8.
 
-**Página DATA** (OSB 11): AGE (1), ECCM (19), COLOR (8), MSI (9), LTWS (10), BRA (14), DCLTR 1/2 (12) y RAID/1LOOK (7, sin función). ECCM solo cambia de estado (en DCS no está simulado); LTWS funciona en RWS; BRA muestra marcación/distancia del cursor; el resto solo cambia de estado.
+**Página DATA** (OSB 11): AGE (5, arriba a la derecha; el botón solo muestra el número de segundos, sin la palabra AGE, como en el vídeo del escuadrón), ECCM (19), COLOR (8), MSI (9), LTWS (10), BRA (14), DCLTR 1/2 (12) y RAID/1LOOK (7, sin función). ECCM solo cambia de estado (en DCS no está simulado); LTWS funciona en RWS; BRA muestra marcación/distancia del cursor; el resto solo cambia de estado.
 
 ## Cómo funciona (resumen de la guía)
 - **RWS**: un Enter sobre un brick = STT directo. Con **LTWS** (DATA) el primer Enter marca L&S (estrella), el siguiente blanco DT2 (rombo) y un segundo Enter sobre el L&S da STT.
